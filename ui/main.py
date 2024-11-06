@@ -4,6 +4,7 @@ import numpy as np
 import os
 import librosa
 from scipy.signal import find_peaks, medfilt
+import csv
 
 # Diretório atual do script
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -11,31 +12,34 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 # Diretório raiz do projeto (subindo um nível)
 ROOT_DIR = os.path.dirname(CURRENT_DIR)
 
+def read_frequencies():
+    file_path = f"{ROOT_DIR}/frequencies.csv"
+    data = []
+    with open(file_path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            # Convertendo os valores de FrequencyMin e FrequencyMax para float
+            row['FrequencyMin'] = float(row['FrequencyMin'])
+            row['FrequencyMax'] = float(row['FrequencyMax'])
+            data.append(row)
+    return data
+
+FREQUENCIES = read_frequencies()
+
 def open_file():
     file_path = filedialog.askopenfilename()
     if file_path:
         frequencies = extract_frequencies(file_path)
         print(frequencies)
 
-def midi_to_note_name(midi_note):
-    print(f"MIDI NOTE {midi_note}")
-    note_names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    octave = (midi_note // 12) - 1
-    note = note_names[midi_note % 12]
-    return f"{note}{octave}"
+def frequency_to_note(frequency):
+    for note_freq in FREQUENCIES:
+        if frequency >= note_freq["FrequencyMin"] and frequency <= note_freq['FrequencyMax']: 
+            return (note_freq['Note'], note_freq['Octave'])
+
+    return None
 
 
-def frequency_to_midi(frequency):
-    if frequency <= 0:
-        return float('inf')
-    return (12 * np.log2(frequency / 440.0)) + 69
-
-
-def frequency_to_note_name(frequency):
-    midi_note = frequency_to_midi(frequency)
-    if midi_note == float('inf'):
-        return "Invalid frequency"
-    return midi_to_note_name(round(midi_note))
 
 def extract_frequencies(file_path):
     y, sr = librosa.load(file_path)
@@ -54,9 +58,15 @@ def extract_frequencies(file_path):
    # Suavização das frequências dominantes
     peak_frequencies = medfilt(peak_frequencies, kernel_size=3)
 
-    midi_notes = [frequency_to_note_name(freq) for freq in peak_frequencies]
-    print(midi_notes)
-    return midi_notes
+    notes = []
+    for freq in peak_frequencies:
+        print(freq)
+        print(frequency_to_note(round(freq,4)))
+        notes.append(frequency_to_note(round(freq,4)))
+
+    
+    print(notes)
+    return notes
 
 
 extract_frequencies(f"{ROOT_DIR}/ADEA.mp3")
