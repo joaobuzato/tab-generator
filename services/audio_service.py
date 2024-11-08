@@ -35,7 +35,7 @@ def open_file():
 def frequency_to_note(frequency):
     for note_freq in FREQUENCIES:
         if frequency >= note_freq["FrequencyMin"] and frequency <= note_freq['FrequencyMax']: 
-            return (note_freq['Note'], note_freq['Octave'])
+            return { "note": note_freq['Note'], "octave":note_freq['Octave'] }
 
     return None
 
@@ -46,17 +46,20 @@ def extract_frequencies(file_path):
     # Remoção de ruído
     y = librosa.effects.remix(y, intervals=librosa.effects.split(y, top_db=20))
     
+    # PEGAR O TEMPO DA FAIXA DE AUDIO 
+    # Calcular o hop_length baseado no tempo da faixa de audio
+
     # STFT
-    stft_result = np.abs(librosa.stft(y, hop_length=4096))
+    stft_result = np.abs(librosa.stft(y, hop_length=1000))
     frequencies = librosa.fft_frequencies(sr=sr)
 
     peak_frequencies = []
     for frame in stft_result.T:
-        peaks, _ = find_peaks(frame, height=4, threshold=5, prominence=1)
+        peaks, _ = find_peaks(frame, height=4, threshold=4, prominence=2, width=2)
         peak_frequencies.extend(frequencies[peaks])
 
    # Suavização das frequências dominantes
-    peak_frequencies = medfilt(peak_frequencies, kernel_size=3)
+    peak_frequencies = medfilt(peak_frequencies, kernel_size=5)
 
     notes = []
     for freq in peak_frequencies:
@@ -69,7 +72,7 @@ def extract_frequencies(file_path):
     return notes
 
 
-extract_frequencies(f"{ROOT_DIR}/ADEA.mp3")
+# extract_frequencies(f"{ROOT_DIR}/D#DG#G.mp3")
 # window = Tk()
 # window.title("Screen")
 # window.config(padx=50, pady=50)

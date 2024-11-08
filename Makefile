@@ -1,5 +1,5 @@
 # Define the main script
-MAIN_SCRIPT = ./ui/main.py
+MAIN_SCRIPT = ./app.py
 
 # Define the Python interpreter
 PYTHON = python3

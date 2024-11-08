@@ -13,4 +13,9 @@ From these frequencies, I'll use an algorithm to get the midi notes, using the f
 
 where f is the frequency of the note.
 440 is the frequency of the A4 note.
-49 is the midi note of the A4 note.
+69 is the midi note of the A4 note.
+
+Ideia frontend:
+Tela com: volume do metronomo - tempó metronomo - botão de gravar audio - botão de parar de gravar
+
+    valor do input de tempo será enviado para o backend e usado para calcular o hop_lenght da extração de frames
